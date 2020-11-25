@@ -128,7 +128,7 @@ class BuilderInfo {
 
   /// Adds Int64 field with Int64.ZERO default.
   void aInt64(int tagNumber, String name, {String protoName}) {
-    add<Int64>(tagNumber, name, PbFieldType.O6, Int64.ZERO, null, null, null,
+    add<int>(tagNumber, name, PbFieldType.O6, 0, null, null, null,
         protoName: protoName);
   }
 

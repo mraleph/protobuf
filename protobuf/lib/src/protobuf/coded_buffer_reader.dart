@@ -33,7 +33,8 @@ class CodedBufferReader {
 
   bool isAtEnd() => _bufferPos >= _currentLimit;
 
-  void _withLimit(int byteLimit, callback) {
+  @pragma('vm:prefer-inline')
+  void _withLimit(int byteLimit, void Function() callback) {
     if (byteLimit < 0) {
       throw ArgumentError(
           'CodedBufferReader encountered an embedded string or message'
@@ -106,18 +107,18 @@ class CodedBufferReader {
 
   int readEnum() => readInt32();
   int readInt32() => _readRawVarint32(true);
-  Int64 readInt64() => _readRawVarint64();
+  int readInt64() => _readRawVarint64();
   int readUint32() => _readRawVarint32(false);
-  Int64 readUint64() => _readRawVarint64();
+  int readUint64() => _readRawVarint64();
   int readSint32() => _decodeZigZag32(readUint32());
-  Int64 readSint64() => _decodeZigZag64(readUint64());
+  int readSint64() => _decodeZigZag64(readUint64());
   int readFixed32() => _readByteData(4).getUint32(0, Endian.little);
-  Int64 readFixed64() => readSfixed64();
+  int readFixed64() => readSfixed64();
   int readSfixed32() => _readByteData(4).getInt32(0, Endian.little);
-  Int64 readSfixed64() {
+  int readSfixed64() {
     var data = _readByteData(8);
-    var view = Uint8List.view(data.buffer, data.offsetInBytes, 8);
-    return Int64.fromBytes(view);
+    var view = Int64List.view(data.buffer, data.offsetInBytes, 1);
+    return view[0];
   }
 
   bool readBool() => _readRawVarint32(true) != 0;
@@ -153,7 +154,7 @@ class CodedBufferReader {
     }
   }
 
-  static Int64 _decodeZigZag64(Int64 value) {
+  static int _decodeZigZag64(int value) {
     if ((value & 0x1) == 1) value = -value;
     return value >> 1;
   }
@@ -184,32 +185,23 @@ class CodedBufferReader {
     throw InvalidProtocolBufferException.malformedVarint();
   }
 
-  Int64 _readRawVarint64() {
-    var lo = 0;
-    var hi = 0;
-
-    // Read low 28 bits.
-    for (var i = 0; i < 4; i++) {
-      var byte = _readRawVarintByte();
-      lo |= (byte & 0x7f) << (i * 7);
-      if ((byte & 0x80) == 0) return Int64.fromInts(hi, lo);
+  int _readRawVarint64() {
+    // Read up to 10 bytes.
+    // We use a local [bufferPos] variable to avoid repeatedly loading/store the
+    // this._bufferpos field.
+    var bufferPos = _bufferPos;
+    var bytes = _currentLimit - bufferPos;
+    if (bytes > 10) bytes = 10;
+    var result = 0;
+    for (var i = 0, limit = bytes * 7; i < limit; i += 7) {
+      var byte = _buffer[bufferPos++];
+      result |= (byte & 0x7f) << i;
+      if ((byte & 0x80) == 0) {
+        _bufferPos = bufferPos;
+        return result;
+      }
     }
-
-    // Read middle 7 bits: 4 low belong to low part above,
-    // 3 remaining belong to hi.
-    var byte = _readRawVarintByte();
-    lo |= (byte & 0xf) << 28;
-    hi = (byte >> 4) & 0x7;
-    if ((byte & 0x80) == 0) {
-      return Int64.fromInts(hi, lo);
-    }
-
-    // Read remaining bits of hi.
-    for (var i = 0; i < 5; i++) {
-      var byte = _readRawVarintByte();
-      hi |= (byte & 0x7f) << ((i * 7) + 3);
-      if ((byte & 0x80) == 0) return Int64.fromInts(hi, lo);
-    }
+    _bufferPos = bufferPos;
     throw InvalidProtocolBufferException.malformedVarint();
   }
 

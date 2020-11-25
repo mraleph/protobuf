@@ -510,10 +510,10 @@ class _FieldSet {
   }
 
   /// The implementation of a generated getter for Int64 fields.
-  Int64 _$getI64(int index) {
+  int _$getI64(int index) {
     var value = _values[index];
     value ??= _getDefault(_nonExtensionInfoByIndex(index));
-    Int64 result = value;
+    int result = value;
     return result;
   }
 

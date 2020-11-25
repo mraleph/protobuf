@@ -16,7 +16,7 @@ Object _writeToProto3Json(_FieldSet fs, TypeRegistry typeRegistry) {
       case PbFieldType._STRING_BIT:
         return key;
       case PbFieldType._UINT64_BIT:
-        return (key as Int64).toStringUnsigned();
+        return (key as int).toString();
       case PbFieldType._INT32_BIT:
       case PbFieldType._SINT32_BIT:
       case PbFieldType._UINT32_BIT:
@@ -71,7 +71,7 @@ Object _writeToProto3Json(_FieldSet fs, TypeRegistry typeRegistry) {
           }
           return value;
         case PbFieldType._UINT64_BIT:
-          return (fieldValue as Int64).toStringUnsigned();
+          return (fieldValue as int).toString();
         case PbFieldType._BYTES_BIT:
           return base64Encode(fieldValue);
         default:
@@ -141,10 +141,10 @@ void _mergeFromProto3Json(
       return n;
     }
 
-    Int64 tryParse64Bit(String s) {
-      Int64 result;
+    int tryParse64Bit(String s) {
+      int result;
       try {
-        result = Int64.parseInt(s);
+        result = int.parse(s);
       } on FormatException {
         throw context.parseException('expected integer', json);
       }
@@ -240,9 +240,9 @@ void _mergeFromProto3Json(
           check32BitSigned(result);
           return result;
         case PbFieldType._UINT64_BIT:
-          Int64 result;
+          int result;
           if (value is int) {
-            result = Int64(value);
+            result = value;
           } else if (value is String) {
             result = tryParse64Bit(value);
           } else {
@@ -254,11 +254,11 @@ void _mergeFromProto3Json(
         case PbFieldType._SINT64_BIT:
         case PbFieldType._FIXED64_BIT:
         case PbFieldType._SFIXED64_BIT:
-          if (value is int) return Int64(value);
+          if (value is int) return value;
           if (value is String) {
-            Int64 result;
+            int result;
             try {
-              result = Int64.parseInt(value);
+              result = int.parse(value);
             } on FormatException {
               throw context.parseException(
                   'Expected int or stringified int', value);

@@ -241,8 +241,8 @@ class ProtobufField {
             break;
         }
       } else {
-        if (makeDefault == '$_fixnumImportPrefix.Int64.ZERO' &&
-            type == '$_fixnumImportPrefix.Int64' &&
+        if (makeDefault == '0' &&
+            type == '$_coreImportPrefix.int' &&
             typeConstant == '$_protobufImportPrefix.PbFieldType.O6') {
           invocation = 'aInt64';
         } else {
@@ -329,8 +329,8 @@ class ProtobufField {
       case FieldDescriptorProto_Type.TYPE_SFIXED64:
         var value = '0';
         if (descriptor.hasDefaultValue()) value = descriptor.defaultValue;
-        if (value == '0') return '$_fixnumImportPrefix.Int64.ZERO';
-        return "$_protobufImportPrefix.parseLongInt('$value')";
+        if (value == '0') return '0';
+        return "$value";
       case FieldDescriptorProto_Type.TYPE_STRING:
         return _getDefaultAsStringExpr(null);
       case FieldDescriptorProto_Type.TYPE_BYTES:

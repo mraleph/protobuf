@@ -450,7 +450,7 @@ abstract class GeneratedMessage {
   String $_getSZ(int index) => _fieldSet._$getSZ(index);
 
   /// For generated code only.
-  Int64 $_getI64(int index) => _fieldSet._$getI64(index);
+  int $_getI64(int index) => _fieldSet._$getI64(index);
 
   /// For generated code only.
   bool $_has(int index) => _fieldSet._$has(index);
@@ -492,7 +492,7 @@ abstract class GeneratedMessage {
   }
 
   /// For generated code only.
-  void $_setInt64(int index, Int64 value) => _fieldSet._$set(index, value);
+  void $_setInt64(int index, int value) => _fieldSet._$set(index, value);
 
   // Support for generating a read-only default singleton instance.
 

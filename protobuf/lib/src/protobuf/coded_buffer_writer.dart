@@ -269,7 +269,7 @@ class CodedBufferWriter {
     _bytesInChunk = i;
   }
 
-  void _writeVarint64(Int64 value) {
+  void _writeVarint64(int value) {
     _ensureBytes(10);
     var i = _bytesInChunk;
     var lo = value.toUnsigned(32).toInt();
@@ -323,7 +323,7 @@ class CodedBufferWriter {
     _bytesTotal += sizeInBytes;
   }
 
-  void _writeInt64(Int64 value) {
+  void _writeInt64(int value) {
     _writeInt32(value.toUnsigned(32).toInt());
     _writeInt32((value >> 32).toUnsigned(32).toInt());
   }
@@ -353,7 +353,7 @@ class CodedBufferWriter {
         value.writeToCodedBufferWriter(this);
         break;
       case PbFieldType._INT32_BIT:
-        _writeVarint64(Int64(value));
+        _writeVarint64(value);
         break;
       case PbFieldType._INT64_BIT:
         _writeVarint64(value);
@@ -492,4 +492,4 @@ class CodedBufferWriter {
 }
 
 int _encodeZigZag32(int value) => (value << 1) ^ (value >> 31);
-Int64 _encodeZigZag64(Int64 value) => (value << 1) ^ (value >> 63);
+int _encodeZigZag64(int value) => (value << 1) ^ (value >> 63);

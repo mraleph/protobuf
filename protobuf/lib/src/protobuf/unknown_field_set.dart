@@ -103,7 +103,7 @@ class UnknownFieldSet {
     _getField(number).addFixed32(value);
   }
 
-  void mergeFixed64Field(int number, Int64 value) {
+  void mergeFixed64Field(int number, int value) {
     _ensureWritable('mergeFixed64Field');
     _getField(number).addFixed64(value);
   }
@@ -118,7 +118,7 @@ class UnknownFieldSet {
     _getField(number).addLengthDelimited(value);
   }
 
-  void mergeVarintField(int number, Int64 value) {
+  void mergeVarintField(int number, int value) {
     _ensureWritable('mergeVarintField');
     _getField(number).addVarint(value);
   }
@@ -195,15 +195,15 @@ class UnknownFieldSet {
 
 class UnknownFieldSetField {
   List<List<int>> _lengthDelimited = <List<int>>[];
-  List<Int64> _varints = <Int64>[];
+  List<int> _varints = <int>[];
   List<int> _fixed32s = <int>[];
-  List<Int64> _fixed64s = <Int64>[];
+  List<int> _fixed64s = <int>[];
   List<UnknownFieldSet> _groups = <UnknownFieldSet>[];
 
   List<List<int>> get lengthDelimited => _lengthDelimited;
-  List<Int64> get varints => _varints;
+  List<int> get varints => _varints;
   List<int> get fixed32s => _fixed32s;
-  List<Int64> get fixed64s => _fixed64s;
+  List<int> get fixed64s => _fixed64s;
   List<UnknownFieldSet> get groups => _groups;
 
   bool _isReadOnly = false;
@@ -296,11 +296,11 @@ class UnknownFieldSetField {
     fixed32s.add(value);
   }
 
-  void addFixed64(Int64 value) {
+  void addFixed64(int value) {
     fixed64s.add(value);
   }
 
-  void addVarint(Int64 value) {
+  void addVarint(int value) {
     varints.add(value);
   }
 

@@ -70,7 +70,7 @@ void _mergeFromCodedBufferReader(
         var value = fs._meta._decodeEnum(tagNumber, registry, rawValue);
         if (value == null) {
           var unknown = fs._ensureUnknownFields();
-          unknown.mergeVarintField(tagNumber, Int64(rawValue));
+          unknown.mergeVarintField(tagNumber, rawValue);
         } else {
           fs._setFieldUnchecked(fi, value);
         }
@@ -124,7 +124,7 @@ void _mergeFromCodedBufferReader(
         fs._setFieldUnchecked(fi, subMessage);
         break;
       case PbFieldType._REPEATED_BOOL:
-        _readPackable(fs, input, wireType, fi, input.readBool);
+        _readPackable$readBool(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_BYTES:
         fs._ensureRepeatedField(fi).add(input.readBytes());
@@ -133,10 +133,10 @@ void _mergeFromCodedBufferReader(
         fs._ensureRepeatedField(fi).add(input.readString());
         break;
       case PbFieldType._REPEATED_FLOAT:
-        _readPackable(fs, input, wireType, fi, input.readFloat);
+        _readPackable$readFloat(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_DOUBLE:
-        _readPackable(fs, input, wireType, fi, input.readDouble);
+        _readPackable$readDouble(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_ENUM:
         _readPackableToListEnum(fs, input, wireType, fi, tagNumber, registry);
@@ -147,34 +147,34 @@ void _mergeFromCodedBufferReader(
         fs._ensureRepeatedField(fi).add(subMessage);
         break;
       case PbFieldType._REPEATED_INT32:
-        _readPackable(fs, input, wireType, fi, input.readInt32);
+        _readPackable$readInt32(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_INT64:
-        _readPackable(fs, input, wireType, fi, input.readInt64);
+        _readPackable$readInt64(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_SINT32:
-        _readPackable(fs, input, wireType, fi, input.readSint32);
+        _readPackable$readSint32(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_SINT64:
-        _readPackable(fs, input, wireType, fi, input.readSint64);
+        _readPackable$readSint64(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_UINT32:
-        _readPackable(fs, input, wireType, fi, input.readUint32);
+        _readPackable$readUint32(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_UINT64:
-        _readPackable(fs, input, wireType, fi, input.readUint64);
+        _readPackable$readUint64(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_FIXED32:
-        _readPackable(fs, input, wireType, fi, input.readFixed32);
+        _readPackable$readFixed32(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_FIXED64:
-        _readPackable(fs, input, wireType, fi, input.readFixed64);
+        _readPackable$readFixed64(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_SFIXED32:
-        _readPackable(fs, input, wireType, fi, input.readSfixed32);
+        _readPackable$readSfixed32(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_SFIXED64:
-        _readPackable(fs, input, wireType, fi, input.readSfixed64);
+        _readPackable$readSfixed64(fs, input, wireType, fi);
         break;
       case PbFieldType._REPEATED_MESSAGE:
         var subMessage = fs._meta._makeEmptyMessage(tagNumber, registry);
@@ -190,12 +190,382 @@ void _mergeFromCodedBufferReader(
   }
 }
 
-void _readPackable(_FieldSet fs, CodedBufferReader input, int wireType,
-    FieldInfo fi, Function readFunc) {
-  void readToList(List list) => list.add(readFunc());
-  _readPackableToList(fs, input, wireType, fi, readToList);
+void _readPackable$readBool(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readBool());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readBool());
+  }
 }
 
+void _readPackable$readFloat(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readFloat());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readFloat());
+  }
+}
+
+void _readPackable$readDouble(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readDouble());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readDouble());
+  }
+}
+
+void _readPackable$readInt32(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readInt32());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readInt32());
+  }
+}
+
+void _readPackable$readInt64(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readInt64());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readInt64());
+  }
+}
+
+void _readPackable$readSint32(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readSint32());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readSint32());
+  }
+}
+
+void _readPackable$readSint64(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  // var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var list = Int64List(16);
+    var len = 0;
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      if (len == list.length) {
+        final old = list;
+        list = Int64List(list.length * 2);
+        for (var i = 0; i < old.length; i++) list[i] = old[i];
+      }
+      list[len++] = input.readSint64();
+    }
+    // final out = (fs._ensureRepeatedField(fi) as PbList)._wrappedList;
+    //out.length = len;
+    //for (var i = 0; i < len; i++) out[i] = list[i];
+    fs._setNonExtensionFieldUnchecked(fi, list);
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    fs._ensureRepeatedField(fi).add(input.readSint64());
+  }
+}
+
+void _readPackable$readUint32(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readUint32());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readUint32());
+  }
+}
+
+void _readPackable$readUint64(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readUint64());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readUint64());
+  }
+}
+
+void _readPackable$readFixed32(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readFixed32());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readFixed32());
+  }
+}
+
+void _readPackable$readFixed64(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readFixed64());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readFixed64());
+  }
+}
+
+void _readPackable$readSfixed32(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readSfixed32());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readSfixed32());
+  }
+}
+
+void _readPackable$readSfixed64(
+    _FieldSet fs, CodedBufferReader input, int wireType, FieldInfo fi) {
+  var list = fs._ensureRepeatedField(fi);
+
+  if (wireType == WIRETYPE_LENGTH_DELIMITED) {
+    var byteLimit = input.readInt32();
+    if (byteLimit < 0) {
+      throw ArgumentError(
+          'CodedBufferReader encountered an embedded string or message'
+          ' which claimed to have negative size.');
+    }
+    byteLimit += input._bufferPos;
+    var oldLimit = input._currentLimit;
+    if ((oldLimit != -1 && byteLimit > oldLimit) ||
+        byteLimit > input._sizeLimit) {
+      throw InvalidProtocolBufferException.truncatedMessage();
+    }
+    input._currentLimit = byteLimit;
+    while (!input.isAtEnd()) {
+      list.add(input.readSfixed64());
+    }
+    input._currentLimit = oldLimit;
+  } else {
+    // Not packed.
+    list.add(input.readSfixed64());
+  }
+}
+
+@pragma('vm:prefer-inline')
 void _readPackableToListEnum(_FieldSet fs, CodedBufferReader input,
     int wireType, FieldInfo fi, int tagNumber, ExtensionRegistry registry) {
   void readToList(List list) {
@@ -203,7 +573,7 @@ void _readPackableToListEnum(_FieldSet fs, CodedBufferReader input,
     var value = fs._meta._decodeEnum(tagNumber, registry, rawValue);
     if (value == null) {
       var unknown = fs._ensureUnknownFields();
-      unknown.mergeVarintField(tagNumber, Int64(rawValue));
+      unknown.mergeVarintField(tagNumber, rawValue);
     } else {
       list.add(value);
     }
@@ -212,9 +582,10 @@ void _readPackableToListEnum(_FieldSet fs, CodedBufferReader input,
   _readPackableToList(fs, input, wireType, fi, readToList);
 }
 
-void _readPackableToList(_FieldSet fs, CodedBufferReader input, int wireType,
-    FieldInfo fi, Function readToList) {
-  var list = fs._ensureRepeatedField(fi);
+@pragma('vm:prefer-inline')
+void _readPackableToList<T>(_FieldSet fs, CodedBufferReader input, int wireType,
+    FieldInfo fi, void Function(List<T>) readToList) {
+  var list = fs._ensureRepeatedField<T>(fi);
 
   if (wireType == WIRETYPE_LENGTH_DELIMITED) {
     // Packed.
